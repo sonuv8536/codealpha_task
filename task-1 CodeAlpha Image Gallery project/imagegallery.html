@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Image Gallery</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .filter-buttons {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .filter-buttons button {
+      padding: 10px 15px;
+      margin: 5px;
+      border: none;
+      border-radius: 5px;
+      background: #333;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .filter-buttons button:hover {
+      background: #555;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+    }
+    .gallery img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.3s ease, filter 0.3s ease;
+    }
+    .gallery img:hover {
+      transform: scale(1.05);
+      filter: brightness(80%);
+    }
+
+    /* Lightbox */
+    .lightbox {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .lightbox img {
+      max-width: 90%;
+      max-height: 80%;
+      border-radius: 10px;
+      transition: opacity 0.3s ease;
+    }
+    .lightbox .close, .lightbox .prev, .lightbox .next {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 2em;
+      color: #fff;
+      cursor: pointer;
+      user-select: none;
+      padding: 10px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.5);
+    }
+    .lightbox .close {
+      top: 20px;
+      right: 30px;
+      transform: none;
+    }
+    .lightbox .prev { left: 30px; }
+    .lightbox .next { right: 30px; }
+    .lightbox .close:hover,
+    .lightbox .prev:hover,
+    .lightbox .next:hover {
+      background: rgba(255,255,255,0.3);
+    }
+  </style>
+</head>
+<body>
+  <h1>Image Gallery</h1>
+ 
+  <div class="filter-buttons">
+    <button data-filter="all">All</button>
+    <button data-filter="nature">Nature</button>
+    <button data-filter="city">City</button>
+    <button data-filter="animals">Animals</button>
+    <button data-filter="vehicle">Vehicle</button>
+  </div>
+
+  <div class="gallery">
+    <img src="https://tse3.mm.bing.net/th/id/OIP.HFEyPXmLD5Sf_zMpRkMPKAHaEo?w=2048&h=1280&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Nature" data-category="nature">
+    <img src="https://tse3.mm.bing.net/th/id/OIP.JoxaiKhpKnS1WPB6l-GOEQHaEK?rs=1&pid=ImgDetMain&o=7&rm=3" alt="Animals" data-category="animals">
+    <img src="https://tse1.mm.bing.net/th/id/OIP.vG2XLs0w2u2mKDXFcWnlRwHaEK?rs=1&pid=ImgDetMain&o=7&rm=3 "alt="City" data-category="city">
+    <img src="https://images.pexels.com/photos/112460/pexels-photo-112460.jpeg?cs=srgb&dl=automobile-automotive-car-112460.jpg&fm=jpg" alt="Vehicle" data-category="vehicle">
+    <img src="https://tse4.mm.bing.net/th/id/OIP.4Ah-98si_AeOxJwO3NyY3gHaEo?w=1920&h=1200&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Nature" data-category="nature">
+    <img src="https://as2.ftcdn.net/v2/jpg/05/06/97/33/1000_F_506973329_NCSJOKETJUZjIW8udBA5LWfZ9vep4kV1.jpg" alt="Animals" data-category="animals">
+    <img src="https://images.wallpapersden.com/image/download/moscow-city-at-night_a2trbmeUmZqaraWkpJRmbmdlrWZlbWU.jpg" alt="City" data-category="city">
+    <img src=" https://tse3.mm.bing.net/th/id/OIP.pEc-ZP4V4QSyWJWNi5ixHAHaE8?rs=1&pid=ImgDetMain&o=7&rm=3"alt="Vehicle" data-category="vehicle">
+  </div>
+
+  <div class="lightbox">
+    <span class="close">&times;</span>
+    <span class="prev">&#10094;</span>
+    <img src="" alt="Lightbox">
+    <span class="next">&#10095;</span>
+  </div>
+
+  <script>
+    const galleryItems = document.querySelectorAll('.gallery img');
+    const lightbox = document.querySelector('.lightbox');
+    const lightboxImg = lightbox.querySelector('img');
+    const closeBtn = lightbox.querySelector('.close');
+    const prevBtn = lightbox.querySelector('.prev');
+    const nextBtn = lightbox.querySelector('.next');
+    const filterButtons = document.querySelectorAll('.filter-buttons button');
+
+    let currentIndex = 0;
+
+    galleryItems.forEach((img, index) => {
+      img.addEventListener('click', () => {
+        currentIndex = index;
+        showImage();
+        lightbox.style.display = 'flex';
+      });
+    });
+
+    closeBtn.addEventListener('click', () => {
+      lightbox.style.display = 'none';
+    });
+
+    prevBtn.addEventListener('click', () => {
+      currentIndex = (currentIndex - 1 + galleryItems.length) % galleryItems.length;
+      showImage();
+    });
+
+    nextBtn.addEventListener('click', () => {
+      currentIndex = (currentIndex + 1) % galleryItems.length;
+      showImage();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (lightbox.style.display === 'flex') {
+        if (e.key === 'ArrowLeft') prevBtn.click();
+        if (e.key === 'ArrowRight') nextBtn.click();
+        if (e.key === 'Escape') closeBtn.click();
+      }
+    });
+
+    function showImage() {
+      const img = galleryItems[currentIndex];
+      lightboxImg.src = img.src;
+      lightboxImg.alt = img.alt;
+    }
+
+    filterButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const filter = button.getAttribute('data-filter');
+        galleryItems.forEach(img => {
+          if (filter === 'all' || img.dataset.category === filter) {
+            img.style.display = 'block';
+          } else {
+            img.style.display = 'none';
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
